@@ -1,0 +1,29 @@
+h1 {
+    /*border: 2px #eee solid;*/
+    color: rgb(42, 91, 165);
+    text-align: center;
+    padding: 10px;
+}
+
+#bigButton {
+    display: inline-block;
+    padding: 25px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #04AA6D;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 9px #999;
+  }
+  
+  #bigButton:hover {background-color: #3e8e41}
+  
+  #bigButton:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+  }

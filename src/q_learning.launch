@@ -1,0 +1,16 @@
+<launch>
+    <!-- Node 1 -->
+    <node name="Sensoren_node" pkg="crawler_controller" type="encoder_left.py" output="screen">
+        <!-- Any ROS parameters for node 1 -->
+    </node>
+    
+    <!-- Node 2 -->
+    <node name="Q_Learning" pkg="crawler_controller" type="q_learning.py" output="screen">
+        <!-- Any ROS parameters for node 2 -->
+    </node>
+    
+
+    
+ 
+</launch>
+

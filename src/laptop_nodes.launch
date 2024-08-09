@@ -1,0 +1,19 @@
+<launch>
+    <!-- Node 1 -->
+    <node name="Tastatur_node" pkg="crawler_controller" type="keyboard_node.py" output="screen">
+        <!-- Any ROS parameters for node 1 -->
+    </node>
+    
+    <!-- Node 2 -->
+    <node name="Motoren_node" pkg="crawler_controller" type="key_test.py" output="screen">
+        <!-- Any ROS parameters for node 2 -->
+    </node>
+    
+        <!-- Node 3 -->
+    <node name="Sensoren_node" pkg="crawler_controller" type="SD.py" output="screen">
+        <!-- Any ROS parameters for node 2 -->
+    </node>
+    
+ 
+</launch>
+

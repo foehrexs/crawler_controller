@@ -1,0 +1,10 @@
+<launch>
+    <!-- Node 1 -->
+    <node name="First_node" pkg="crawler_controller" type="start_stop_parameters.py" output="screen">
+        <!-- Any ROS parameters for node 1 -->
+    </node>
+    
+
+    
+ 
+</launch>
