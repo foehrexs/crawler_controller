@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+#-*- coding: utf-8 -*-
+
 from flask import Flask, render_template,jsonify, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 import subprocess
