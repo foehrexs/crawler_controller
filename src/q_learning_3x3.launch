@@ -5,7 +5,7 @@
     </node>
     
     <!-- Node 2 -->
-    <node name="Q_Learning" pkg="crawler_controller" type="q_learning_3x3.py" output="screen">
+    <node name="Q_Learning" pkg="crawler_controller" type="q_learning_3x3_sensor_test.py" output="screen">
         <!-- Any ROS parameters for node 2 -->
     </node>
     
