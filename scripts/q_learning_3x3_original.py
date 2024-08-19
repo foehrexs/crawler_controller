@@ -13,13 +13,6 @@ from dynamixel_sdk import *
 import time
 import os
 import subprocess
-import csv
-from datetime import datetime
-
-#Log File name and Headers
-log_filename = '/home/mars/catkin_ws/src/crawler_controller/scripts/logs/logfile.csv'    
-headers = ['Timestamp','Episode', 'Progress']
-
 
 # OLED-Konstanten
 serial = i2c(port=1, address=0x3C)
@@ -84,7 +77,7 @@ def get_reward_from_encoder_position(current_position):
 
     # Differenz berechnen
     difference = current_position - last_encoder_position
-    add_log(episode, difference)
+
     # Letzten Wert für den nächsten Durchlauf aktualisieren
     last_encoder_position = current_position
 
@@ -184,8 +177,8 @@ def adjust_motor_position(id, step):
     return desired_position
 
 
-def start_countdown(count_param):
-    for i in range(count_param, 0, -1):
+def start_countdown():
+    for i in range(5, 0, -1):
         update_oled_display(str(i))
         time.sleep(1)
     update_oled_display("Running 3x3")
@@ -241,23 +234,10 @@ def shutdown_procedure():
     for motor_id in [DXL_ID_1, DXL_ID_3]:
         packetHandler.write1ByteTxRx(portHandler, motor_id, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
     print("Motors are turned off. Goodbye!")
-    
-# Function to add a log entry
-def add_log(episode,progress):
-    # Create a new log entry with the current timestamp
-    log_entry = (datetime.now(),episode, progress)
-    
-    # Open the file in append mode and write the log entry
-    with open(log_filename, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(log_entry)
 
 def main():
     rospy.init_node("move_control")
-    count_param = rospy.get_param('~param1', 'default_value1')
-    print("parameter")
-    print(count_param)
-    rospy.Subscriber("left_encoder_value", Int32, left_encoder_callback)
+    rospy.Subscriber("encoder_left", Int32, left_encoder_callback)
     rospy.on_shutdown(shutdown_procedure)
 
     try:
@@ -265,26 +245,16 @@ def main():
     except Exception as e:
         print("Error initializing motors:", e)
         return
-        
-    with open(log_filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(headers)    
     
-    start_countdown(count_param)
+    #start_countdown()
     update_oled_display("Running 3x3")
     total_episodes = 1000
-    #starting time stamp
-    add_log(0,0)
-    #print(logs)
-    global episode
-    
     for episode in range(total_episodes):
         state = state_from_motor_positions()
         done = False
 	
         while not done:
             action = choose_action(state)
-            #log action
             try:
                 print(action, state)
                 next_state, reward, done = execute_action_on_motors_and_get_feedback(action, state)

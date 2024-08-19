@@ -7,7 +7,7 @@ import subprocess
 import os
 import signal
 
-print("app_parameters_onsite.py")
+print("default application")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Kei'
@@ -18,6 +18,7 @@ robot_state = {"running": False, "data": "No data yet"}
 def start_robot():
     global robot_state
     global pid
+    global pid_encoder
     #print("parameter:")
     print("in the starting realm")
     #print(cnt)
@@ -28,13 +29,16 @@ def start_robot():
         "_param3:={}".format(dfactor)
     ]
     print(params)
-    #pid = start_ros_node('crawler_controller', 'q_learning_3x3_parameters.py', 'Q_Learning', params)
+    pid_encoder = start_ros_node('crawler_controller', 'encoder_left.py', 'Sensoren_node', params)
+    pid = start_ros_node('crawler_controller', 'q_learning_3x3.py', 'Q_Learning', params)
+    print("after starting the node")
     robot_state["running"] = True
     robot_state["data"] = "Robot started"
 
 def stop_robot():
     global robot_state
-    #stop_ros_node(pid, 'q_learning_3x3.py')
+    stop_ros_node(pid, 'q_learning_3x3.py')
+    stop_ros_node(pid_encoder, 'encoder_left.py')
     robot_state["running"] = False
     robot_state["data"] = "Robot stopped"
 
@@ -62,9 +66,9 @@ def start_ros_node(node_package, node_type, node_name, params=None):
 
         # Start the ROS node
         process = subprocess.Popen(command, env=env)
-        return process.pid  # Return the process ID
 
         print("Started ROS node '{}' with PID {}".format(node_name, process.pid))
+        return process.pid  # Return the process ID
 
     except Exception as e:
         print("Failed to start ROS node '{}': {}".format(node_name, e))
@@ -85,7 +89,7 @@ def index():
 
 @app.route('/steuerung')
 def steuerung():
-    return render_template('steuerung_parameters.html')
+    return render_template('steuerung.html')
 
 
 @app.route('/start', methods=['POST'])

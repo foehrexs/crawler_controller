@@ -135,6 +135,8 @@ def execute_action_on_motors_and_get_feedback(action, state):
     time.sleep(0.5) # Pause nach dem Bewegen der Motoren
 
     feedback = read_sensor_value()  # Implement 'read_sensor_value()' Funktion
+    print("feedback")
+    print(feedback)
     reward = get_reward_from_encoder_position(feedback)  # Belohnung berechnen
     next_state = state_from_motor_positions()
     done = next_state == state  # Beispielhaftes Kriterium

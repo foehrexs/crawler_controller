@@ -40,6 +40,8 @@ def sensor_node():
 
     rate = rospy.Rate(10)  # 10 Hz
     while not rospy.is_shutdown():
+        #print("encoder position")
+        #print(encoder_position)
         pub.publish(encoder_position)
         rate.sleep()
 
