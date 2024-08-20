@@ -6,6 +6,7 @@ from werkzeug.exceptions import abort
 import subprocess
 import os
 import signal
+import rospy
 
 print("default application")
 
@@ -132,4 +133,9 @@ def data():
     return jsonify(data=data)
 
 if __name__ == '__main__':
-    app.run(debug=True, host= '0.0.0.0')
+    rospy.init_node('App_node')
+    from threading import Thread
+    flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
+    flask_thread.start()
+    rospy.spin()
+    #app.run(debug=True, host= '0.0.0.0')

@@ -1,0 +1,9 @@
+<launch>
+    <!-- Node 1 -->
+    <node name="App_node" pkg="crawler_controller" type="app.py" output="screen">
+        <!-- Any ROS parameters for node 1 -->
+    </node>
+
+    
+ 
+</launch>
