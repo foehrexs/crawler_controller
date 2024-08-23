@@ -7,11 +7,15 @@ import subprocess
 import os
 import signal
 import rospy
+from std_msgs.msg import String
+from flask_sock import Sock
 
 print("default application")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Kei'
+sock = Sock(app)
+recent_data = ""
 
 # Global robot state
 robot_state = {"running": False, "data": "No data yet"}
@@ -82,6 +86,10 @@ def stop_ros_node(pid, node_name):
 
     except Exception as e:
         print("Failed to stop ROS node '{}': {}".format(node_name, e))
+        
+def callback(data):
+    global recent_data
+    recent_data = data.data
 
 
 @app.route('/')
@@ -131,9 +139,21 @@ def stop():
 def data():
     data = get_robot_data()
     return jsonify(data=data)
+    
+@sock.route('/ws')
+def ws(ws):
+    global recent_data
+    #recent_data = "a"
+    while True:
+        # Send the latest data to the connected client
+        #recent_data = recent_data + "a"
+        ws.send(recent_data)
+        rospy.sleep(1)  # Control the update frequency
+
 
 if __name__ == '__main__':
     rospy.init_node('App_node')
+    rospy.Subscriber('graph_data', String, callback)
     from threading import Thread
     flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
     flask_thread.start()

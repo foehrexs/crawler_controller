@@ -25,6 +25,9 @@
     <button class="btn btn-danger" id="stopButton" onclick="this.blur();">Stop Robot</button>
     <p>Robot Data: <span id="robotData">No data yet</span></p>
   </div>
+  
+<h1>ROS Text Field Update</h1>
+    <input type="text" id="rosTextField" value="Initial Value">
 
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script>
@@ -88,6 +91,17 @@
 			console.error('Error:', error);
 		});
 	}
+	
+	function updateTextField(newValue) {
+            document.getElementById("rosTextField").value = newValue;
+        }
+
+        // Connect to the WebSocket server
+        var ws = new WebSocket("ws://localhost:5000/ws");
+
+        ws.onmessage = function(event) {
+            updateTextField(event.data);
+        };
     
   </script>
 

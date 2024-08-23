@@ -15,6 +15,7 @@ import os
 import subprocess
 import csv
 from datetime import datetime
+from std_msgs.msg import String
 
 #Log File name and Headers
 log_filename = '/home/mars/catkin_ws/src/crawler_controller/scripts/logs/logfile.csv'    
@@ -245,6 +246,8 @@ def shutdown_procedure():
 def add_log(episode,progress):
     # Create a new log entry with the current timestamp
     log_entry = (datetime.now(),episode, progress)
+    log_string = (str(datetime.now()) + "," + str(episode) + "," + str(progress))
+    pub.publish(log_string)
     
     # Open the file in append mode and write the log entry
     with open(log_filename, mode='a', newline='') as file:
@@ -257,6 +260,11 @@ def main():
     print("parameter")
     print(count_param)
     rospy.Subscriber("left_encoder_value", Int32, left_encoder_callback)
+    
+    global pub
+    pub = rospy.Publisher('graph_data', String, queue_size=10)
+    
+    
     rospy.on_shutdown(shutdown_procedure)
 
     try:
