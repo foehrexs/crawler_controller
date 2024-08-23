@@ -74,19 +74,18 @@ def initialize_motors():
 
 last_encoder_position = None  # Initialer Wert; wird beim ersten Durchlauf gesetzt
 
-def get_reward_from_encoder_position(current_position):
+def get_reward_from_encoder_position(current_enc_position):
     global last_encoder_position
     
     # Beim ersten Durchlauf wird nur der aktuelle Wert gespeichert
     if last_encoder_position is None:
-        last_encoder_position = current_position
+        last_encoder_position = current_enc_position
         return 0  # Keine Belohnung beim ersten Durchlauf
 
     # Differenz berechnen
-    difference = current_position - last_encoder_position
-    add_log(episode, difference)
+    difference = current_enc_position - last_encoder_position
     # Letzten Wert für den nächsten Durchlauf aktualisieren
-    last_encoder_position = current_position
+    last_encoder_position = current_enc_position
 
     # Belohnung zuweisen
     if difference > 0:
@@ -281,6 +280,10 @@ def main():
     for episode in range(total_episodes):
         state = state_from_motor_positions()
         done = False
+        
+        #Speicherung des Reifenstandes vor der Episode
+        first_pos_in_episode = left_encoder_value
+        
 	
         while not done:
             action = choose_action(state)
@@ -305,7 +308,12 @@ def main():
                 #safe_shutdown()
                 exit()
                 break
-
+        
+        #Speicherung des Reifenstandes nach der Episode
+        last_pos_in_episode = left_encoder_value
+        episode_difference = last_pos_in_episode - first_pos_in_episode
+        add_log(episode, episode_difference)
+        
         exploration_rate = min_exploration_rate + (max_exploration_rate - min_exploration_rate) * torch.exp(torch.tensor(-exploration_decay_rate * episode))
 
     
