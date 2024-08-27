@@ -16,6 +16,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Kei'
 sock = Sock(app)
 recent_data = ""
+ws_connection = None
 
 # Global robot state
 robot_state = {"running": False, "data": "No data yet"}
@@ -24,6 +25,7 @@ def start_robot():
     global robot_state
     global pid
     global pid_encoder
+    global pid_graph
     #print("parameter:")
     print("in the starting realm")
     #print(cnt)
@@ -36,6 +38,7 @@ def start_robot():
     print(params)
     pid_encoder = start_ros_node('crawler_controller', 'encoder_left.py', 'Sensoren_node', params)
     pid = start_ros_node('crawler_controller', 'q_learning_3x3.py', 'Q_Learning', params)
+    pid_graph = start_ros_node('crawler_controller', 'data_work.py', 'Graph_node', params)
     print("after starting the node")
     robot_state["running"] = True
     robot_state["data"] = "Robot started"
@@ -44,6 +47,7 @@ def stop_robot():
     global robot_state
     stop_ros_node(pid, 'q_learning_3x3.py')
     stop_ros_node(pid_encoder, 'encoder_left.py')
+    stop_ros_node(pid_graph, 'data_work.py')
     robot_state["running"] = False
     robot_state["data"] = "Robot stopped"
 
@@ -90,6 +94,14 @@ def stop_ros_node(pid, node_name):
 def callback(data):
     global recent_data
     recent_data = data.data
+    global ws_connection
+    if ws_connection:
+        try:
+            # Send the data received from ROS topic to the WebSocket client
+            ws_connection.send(recent_data)
+        except Exception as e:
+            print(f"Failed to send data over WebSocket: {e}")
+            ws_connection = None  # Reset the connection if sending fails
 
 
 @app.route('/')
@@ -142,13 +154,24 @@ def data():
     
 @sock.route('/ws')
 def ws(ws):
-    global recent_data
+    #global recent_data
     #recent_data = "a"
-    while True:
+    #while True:
         # Send the latest data to the connected client
         #recent_data = recent_data + "a"
-        ws.send(recent_data)
-        rospy.sleep(1)  # Control the update frequency
+        #ws.send(recent_data)
+        #rospy.sleep(1)  # Control the update frequency
+    global ws_connection
+    ws_connection = ws
+    print("WebSocket connection opened")
+    # Keep the connection open to handle incoming messages (if any)
+    while True:
+        message = ws.receive()
+        if message is None:
+            break  # Connection closed, exit loop
+
+    print("WebSocket connection closed")
+    ws_connection = None
 
 
 if __name__ == '__main__':
