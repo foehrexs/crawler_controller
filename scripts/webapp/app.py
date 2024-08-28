@@ -112,6 +112,10 @@ def index():
 def steuerung():
     return render_template('steuerung.html')
 
+@app.route('/graph')
+def graph():
+    return render_template('graph.html')
+
 
 @app.route('/start', methods=['POST'])
 def start():   

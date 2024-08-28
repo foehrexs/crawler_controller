@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/steuerung.css') }}">
+
+<h1>{% block title %} Visualisierung {% endblock %}</h1>
+    
+<h2>Progress Over Episodes</h2>
+    <img id="progressImage" src="{{ url_for('static', filename='images/progress_over_episodes.png') }}" alt="Progress Over Episodes">
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+
+        // Connect to the WebSocket server
+        var ws = new WebSocket("ws://localhost:5000/ws");
+
+        ws.onmessage = function(event) {
+            refreshImage();
+        };
+        
+    function refreshImage() {
+        const img = document.getElementById('progressImage');
+        img.src = img.src.split('?')[0] + '?' + new Date().getTime();
+    }
+    
+  </script>
+
+{% endblock %}
+

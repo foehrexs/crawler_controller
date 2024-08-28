@@ -28,9 +28,7 @@
   
 <h1>ROS Text Field Update</h1>
     <input type="text" id="rosTextField" value="Initial Value">
-    
-<h1>Progress Over Episodes</h1>
-    <img id="progressImage" src="{{ url_for('static', filename='images/progress_over_episodes.png') }}" alt="Progress Over Episodes">
+
 
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script>
@@ -103,13 +101,35 @@
         var ws = new WebSocket("ws://localhost:5000/ws");
 
         ws.onmessage = function(event) {
-            refreshImage();
+            updateTextField(event.data);
         };
         
-    function refreshImage() {
-        const img = document.getElementById('progressImage');
-        img.src = img.src.split('?')[0] + '?' + new Date().getTime();
-    }
+    // Function to save form data to localStorage
+        function saveFormData() {
+            const countdown = document.getElementById('countdown').value;
+            const lrate = document.getElementById('lrate').value;
+            const dfactor = document.getElementById('dfactor').value;
+            localStorage.setItem('countdown', countdown);
+            localStorage.setItem('lrate', lrate);
+            localStorage.setItem('dfactor', dfactor);
+        }
+
+        // Function to load form data from localStorage
+        function loadFormData() {
+            document.getElementById('countdown').value = localStorage.getItem('countdown') || '';
+            document.getElementById('lrate').value = localStorage.getItem('lrate') || '';
+            document.getElementById('dfactor').value = localStorage.getItem('dfactor') || '';
+            fetchData()
+        }
+        
+        // Save data when input fields change
+        document.getElementById('countdown').addEventListener('input', saveFormData);
+        document.getElementById('lrate').addEventListener('input', saveFormData);
+        document.getElementById('dfactor').addEventListener('input', saveFormData);
+
+
+        // Load saved data on page load
+        window.onload = loadFormData;
     
   </script>
 
