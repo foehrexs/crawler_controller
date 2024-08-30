@@ -101,7 +101,8 @@
         var ws = new WebSocket("ws://localhost:5000/ws");
 
         ws.onmessage = function(event) {
-            updateTextField(event.data);
+			updateTextField(event.data);
+            fetchData();
         };
         
     // Function to save form data to localStorage

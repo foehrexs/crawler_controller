@@ -24,9 +24,9 @@ def callback(data):
     progresses.append(int(progress_str))
 
     # Keep only the last 20 episodes
-    if len(episodes) > 20:
-        episodes.pop(0)
-        progresses.pop(0)
+    #if len(episodes) > 20:
+        #episodes.pop(0)
+        #progresses.pop(0)
         
     # Create the plot
     plt.figure(figsize=(10, 6))

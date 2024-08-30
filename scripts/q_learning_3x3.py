@@ -55,8 +55,10 @@ def enable_all_motors():
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, motor_id, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
         if dxl_comm_result != COMM_SUCCESS:
             print(f"Failed to enable torque for Motor {motor_id}")
+            error_pub.publish("Not able to properly enable motors")
         elif dxl_error != 0:
             print(f"Error occurred while enabling torque for Motor {motor_id}: {packetHandler.getRxPacketError(dxl_error)}")
+            error_pub.publish("Not able to properly enable motors")
         else:
             print(f"Motor {motor_id} is now stiff (torque enabled).")
 
@@ -264,6 +266,9 @@ def main():
     global pub
     pub = rospy.Publisher('graph_data', String, queue_size=10)
     
+    global error_pub
+    error_pub = rospy.Publisher("motor_errors", String, queue_size=10)
+    
     
     rospy.on_shutdown(shutdown_procedure)
 
@@ -304,7 +309,7 @@ def main():
                 print(next_state, reward, done, action, state)
                 print(str(e))
                 time.sleep(10)
-                #safe_shutdown()
+                safe_shutdown()
                 exit()
                 break
             learn(state, action, reward, next_state)
@@ -313,7 +318,7 @@ def main():
 
             # Überprüfen, ob die Motoren noch erreichbar sind
             if not motors_reachable():
-                #safe_shutdown()
+                safe_shutdown()
                 exit()
                 break
         

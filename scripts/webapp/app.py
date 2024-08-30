@@ -9,6 +9,16 @@ import signal
 import rospy
 from std_msgs.msg import String
 from flask_sock import Sock
+import socket
+#relevant for the display
+from luma.core.interface.serial import i2c
+from luma.core.render import canvas
+from luma.oled.device import sh1106
+from PIL import ImageFont
+# OLED-Konstanten
+serial = i2c(port=1, address=0x3C)
+device = sh1106(serial)
+oled_font = ImageFont.truetype('FreeSans.ttf', 14)
 
 print("default application")
 
@@ -20,6 +30,25 @@ ws_connection = None
 
 # Global robot state
 robot_state = {"running": False, "data": "No data yet"}
+
+def update_oled_display(message):
+    with canvas(device) as draw:
+        draw.rectangle(device.bounding_box, outline="white", fill="black")
+        draw.text((5, 5), message, font=oled_font, fill="white")
+
+def get_local_ip():
+    # Erstellt einen Dummy-Socket, um die IP-Adresse zu ermitteln
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Verbindet den Socket mit einer öffentlichen Adresse (8.8.8.8:80 ist ein Google DNS)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
+
 
 def start_robot():
     global robot_state
@@ -94,11 +123,29 @@ def stop_ros_node(pid, node_name):
 def callback(data):
     global recent_data
     recent_data = data.data
-    global ws_connection
+    """global ws_connection
     if ws_connection:
         try:
             # Send the data received from ROS topic to the WebSocket client
             ws_connection.send(recent_data)
+        except Exception as e:
+            print(f"Failed to send data over WebSocket: {e}")
+            ws_connection = None  # Reset the connection if sending fails"""
+
+def error_callback(data):
+    global robot_state
+    global error_message
+    error_message = data.data
+    robot_state["running"] = False
+    robot_state["data"] = str(error_message)
+    print("in Callback")
+    print(error_message)
+    global ws_connection
+    if ws_connection:
+        try:
+            # Send the data received from ROS topic to the WebSocket client
+            ws_connection.send(error_message)
+            print("send the message")
         except Exception as e:
             print(f"Failed to send data over WebSocket: {e}")
             ws_connection = None  # Reset the connection if sending fails
@@ -106,6 +153,9 @@ def callback(data):
 
 @app.route('/')
 def index():
+    local_ip = get_local_ip()
+    print(f"Die IP-Adresse dieses Computers ist: {local_ip}")
+    update_oled_display(str(local_ip)+"\n:5000")
     return render_template('index.html')
 
 @app.route('/steuerung')
@@ -181,8 +231,11 @@ def ws(ws):
 if __name__ == '__main__':
     rospy.init_node('App_node')
     rospy.Subscriber('graph_data', String, callback)
+    rospy.Subscriber("motor_errors", String, error_callback)
     from threading import Thread
     flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
     flask_thread.start()
+    local_ip = get_local_ip()
+    update_oled_display(str(local_ip)+"\n:5000")
     rospy.spin()
     #app.run(debug=True, host= '0.0.0.0')
