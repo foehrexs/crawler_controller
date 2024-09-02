@@ -141,6 +141,10 @@ def error_callback(data):
     robot_state["data"] = str(error_message)
     print("in Callback")
     print(error_message)
+    stop_ros_node(pid, 'q_learning_3x3.py')
+    stop_ros_node(pid_encoder, 'encoder_left.py')
+    stop_ros_node(pid_graph, 'data_work.py')
+    print("stopped everything")
     global ws_connection
     if ws_connection:
         try:
