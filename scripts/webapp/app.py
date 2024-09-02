@@ -27,6 +27,7 @@ app.config['SECRET_KEY'] = 'Kei'
 sock = Sock(app)
 recent_data = ""
 ws_connection = None
+ws_connection2 = None
 
 # Global robot state
 robot_state = {"running": False, "data": "No data yet"}
@@ -123,14 +124,14 @@ def stop_ros_node(pid, node_name):
 def callback(data):
     global recent_data
     recent_data = data.data
-    """global ws_connection
-    if ws_connection:
+    global ws_connection2
+    if ws_connection2:
         try:
             # Send the data received from ROS topic to the WebSocket client
-            ws_connection.send(recent_data)
+            ws_connection2.send(recent_data)
         except Exception as e:
             print(f"Failed to send data over WebSocket: {e}")
-            ws_connection = None  # Reset the connection if sending fails"""
+            ws_connection2 = None  # Reset the connection if sending fails
 
 def error_callback(data):
     global robot_state
@@ -226,6 +227,28 @@ def ws(ws):
 
     print("WebSocket connection closed")
     ws_connection = None
+    
+    
+@sock.route('/ws2')
+def ws2(ws2):
+    #global recent_data
+    #recent_data = "a"
+    #while True:
+        # Send the latest data to the connected client
+        #recent_data = recent_data + "a"
+        #ws.send(recent_data)
+        #rospy.sleep(1)  # Control the update frequency
+    global ws_connection2
+    ws_connection2 = ws2
+    print("WebSocket2 connection opened")
+    # Keep the connection open to handle incoming messages (if any)
+    while True:
+        message = ws2.receive()
+        if message is None:
+            break  # Connection closed, exit loop
+
+    print("WebSocket2 connection closed")
+    ws_connection2 = None
 
 
 if __name__ == '__main__':

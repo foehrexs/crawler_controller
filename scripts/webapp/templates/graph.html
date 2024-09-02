@@ -12,9 +12,9 @@
   <script>
 
         // Connect to the WebSocket server
-        var ws = new WebSocket("ws://localhost:5000/ws");
+        var ws2 = new WebSocket("ws://localhost:5000/ws2");
 
-        ws.onmessage = function(event) {
+        ws2.onmessage = function(event) {
             refreshImage();
         };
         

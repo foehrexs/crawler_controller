@@ -3,9 +3,12 @@ h1 {
     color: rgb(42, 91, 165);
     text-align: center;
     padding: 10px;
+    padding-bottom: 50px;
 }
 
-#bigButton {
+#startButton {
+    width: 150px;         
+    height: 150px;
     display: inline-block;
     padding: 25px 25px;
     font-size: 24px;
@@ -20,10 +23,54 @@ h1 {
     box-shadow: 0 9px #999;
   }
   
-  #bigButton:hover {background-color: #3e8e41}
+  #startButton:hover {background-color: #3e8e41}
   
-  #bigButton:active {
+  #startButton:active {
     background-color: #3e8e41;
     box-shadow: 0 5px #666;
     transform: translateY(4px);
   }
+
+
+#stopButton {
+    width: 150px;         
+    height: 150px;
+    display: inline-block;
+    padding: 25px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #bc1206;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 9px #999;
+  }
+  
+  #stopButton:hover {background-color: #910e05}
+  
+  #stopButton:active {
+    background-color: #910e05;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+  }
+  
+.bigContainer {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Drei Spalten, jede nimmt 1/3 des verfügbaren Platzes ein */
+            gap: 10px; /* Abstand zwischen den Elementen */
+        }
+        
+        
+.buttonContainer {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Drei Spalten, jede nimmt 1/3 des verfügbaren Platzes ein */
+        }
+        
+.buttonTextContainer {
+            display: grid;
+            grid-template-rows: 200px 150px;; /* Drei Spalten, jede nimmt 1/3 des verfügbaren Platzes ein */
+        }
+
