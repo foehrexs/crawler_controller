@@ -126,7 +126,7 @@ def adjust_motor_position(id, step):
     min_limit = MOTOR_LIMITS[id]['min']
     max_limit = MOTOR_LIMITS[id]['max']
     
-    desired_position = max(min_limit, min(desired_position, max_limit))
+    #desired_position = max(min_limit, min(desired_position, max_limit))
     try:
         dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, id, ADDR_GOAL_POSITION, desired_position)
     except Exception as e:
@@ -194,19 +194,23 @@ def shutdown_procedure():
         packetHandler.write1ByteTxRx(portHandler, motor_id, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
     print("Motors are turned off. Goodbye!")
     
-def motor1_callback(data):
-    print("callback1")
+def motorArm_callback(data):
+    print("callbackArm")
     step = data.data
     adjust_motor_position(DXL_ID_1, step)
     current_position = read_motor_position(DXL_ID_1)
     print(current_position)
+    pubArm.publish(int(current_position))
+    print("published")
     
-def motor2_callback(data):
-    print("callback2")
+def motorHand_callback(data):
+    print("callbackHand")
     step = data.data
     adjust_motor_position(DXL_ID_3, step)
     current_position = read_motor_position(DXL_ID_3)
     print(current_position)
+    pubHand.publish(int(current_position))
+    print("published")
     
 
 
@@ -218,11 +222,14 @@ def main():
     print(count_param)
     rospy.Subscriber("left_encoder_value", Int32, left_encoder_callback)
     
-    rospy.Subscriber("motor1", Int32, motor1_callback)
-    rospy.Subscriber("motor2", Int32, motor2_callback)
+    rospy.Subscriber("motorArm", Int32, motorArm_callback)
+    rospy.Subscriber("motorHand", Int32, motorHand_callback)
     
-    global pub
-    pub = rospy.Publisher('graph_data', String, queue_size=10)
+    global pubArm
+    pubArm = rospy.Publisher('positionArm', Int32, queue_size=10)
+    
+    global pubHand
+    pubHand = rospy.Publisher('positionHand', Int32, queue_size=10)
     
     global error_pub
     error_pub = rospy.Publisher("motor_errors", String, queue_size=10)

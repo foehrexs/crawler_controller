@@ -20,6 +20,7 @@
 			<button class="btn btn-primary" id="upButtonArm" onclick="this.blur()">Hoch</button>
 			<button class="btn btn-danger" id="downButtonArm" onclick="this.blur();">Runter</button>
 		</div>
+		<p>Motor Position: <span id="armData">No data yet</span></p>
 	</div>
 	<div class="controlHand">
 		<h3>Äußerer Motor</h3>
@@ -27,6 +28,7 @@
 			<button class="btn btn-primary" id="upButtonHand" onclick="this.blur()">Hoch</button>
 			<button class="btn btn-danger" id="downButtonHand" onclick="this.blur();">Runter</button>
 		</div>
+		<p>Motor Position: <span id="handData">No data yet</span></p>
 	</div>
  </div>
 
@@ -118,6 +120,18 @@
           document.getElementById('robotData').textContent = data.data;
         });
     }
+    
+    var wsArm = new WebSocket("ws://localhost:5000/wsArm");
+
+        wsArm.onmessage = function(event) {
+            document.getElementById('armData').textContent = event.data;
+        };
+        
+    var wsHand = new WebSocket("ws://localhost:5000/wsHand");
+
+        wsHand.onmessage = function(event) {
+            document.getElementById('handData').textContent = event.data;
+        };
     
   </script>
 

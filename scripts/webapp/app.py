@@ -20,6 +20,8 @@ sock = Sock(app)
 recent_data = ""
 ws_connection = None
 ws_connection2 = None
+ws_connection_arm = None
+ws_connection_hand = None
 
 # Global robot state
 robot_state = {"running": False, "data": "No data yet"}
@@ -85,6 +87,7 @@ def stop_robot_manuel():
     stop_ros_node(pid_encoder, 'encoder_left.py')
     robot_state["running"] = False
     robot_state["data"] = "Robot stopped"
+    pubMonitor.publish(str(local_ip)+"\n:5000")
 
 def stop_robot():
     global robot_state
@@ -94,6 +97,7 @@ def stop_robot():
     stop_ros_node(pid_graph, 'data_work.py')
     robot_state["running"] = False
     robot_state["data"] = "Robot stopped"
+    pubMonitor.publish(str(local_ip)+"\n:5000")
 
 def get_robot_data():
     return robot_state["data"]
@@ -168,6 +172,35 @@ def error_callback(data):
         except Exception as e:
             print(f"Failed to send data over WebSocket: {e}")
             ws_connection = None  # Reset the connection if sending fails
+            
+def positionArm_callback(data):
+    print("in the arm callback in the app")
+    global positionArm
+    positionArm = data.data
+    global ws_connection_arm
+    if ws_connection_arm:
+        try:
+            # Send the data received from ROS topic to the WebSocket client
+            ws_connection_arm.send(positionArm)
+            print("send the arm position")
+        except Exception as e:
+            print(f"Failed to send data over WebSocket: {e}")
+            ws_connection_arm = None  # Reset the connection if sending fails
+            
+            
+def positionHand_callback(data):
+    print("in the Hand callback in the app")
+    global positionHand
+    positionHand = data.data
+    global ws_connection_hand
+    if ws_connection_hand:
+        try:
+            # Send the data received from ROS topic to the WebSocket client
+            ws_connection_hand.send(positionHand)
+            print("send the hand position")
+        except Exception as e:
+            print(f"Failed to send data over WebSocket: {e}")
+            ws_connection_hand = None  # Reset the connection if sending fails
 
 
 @app.route('/')
@@ -179,7 +212,6 @@ def index():
 
 @app.route('/automatik')
 def automatik():
-    pubMonitor.publish("automatik")
     print("send")
     return render_template('automatik.html')
     
@@ -258,13 +290,6 @@ def data():
     
 @sock.route('/ws')
 def ws(ws):
-    #global recent_data
-    #recent_data = "a"
-    #while True:
-        # Send the latest data to the connected client
-        #recent_data = recent_data + "a"
-        #ws.send(recent_data)
-        #rospy.sleep(1)  # Control the update frequency
     global ws_connection
     ws_connection = ws
     print("WebSocket connection opened")
@@ -280,13 +305,6 @@ def ws(ws):
     
 @sock.route('/ws2')
 def ws2(ws2):
-    #global recent_data
-    #recent_data = "a"
-    #while True:
-        # Send the latest data to the connected client
-        #recent_data = recent_data + "a"
-        #ws.send(recent_data)
-        #rospy.sleep(1)  # Control the update frequency
     global ws_connection2
     ws_connection2 = ws2
     print("WebSocket2 connection opened")
@@ -299,24 +317,56 @@ def ws2(ws2):
     print("WebSocket2 connection closed")
     ws_connection2 = None
 
+@sock.route('/wsArm')
+def wsArm(wsArm):
+    global ws_connection_arm
+    ws_connection_arm = wsArm
+    print("WebSocketArm connection opened")
+    # Keep the connection open to handle incoming messages (if any)
+    while True:
+        message = wsArm.receive()
+        if message is None:
+            break  # Connection closed, exit loop
+
+    print("WebSocketArm connection closed")
+    ws_connection_arm = None
+    
+@sock.route('/wsHand')
+def wsHand(wsHand):
+    global ws_connection_hand
+    ws_connection_hand = wsHand
+    print("WebSocketHand connection opened")
+    # Keep the connection open to handle incoming messages (if any)
+    while True:
+        message = wsHand.receive()
+        if message is None:
+            break  # Connection closed, exit loop
+
+    print("WebSocketArm connection closed")
+    ws_connection_hand = None
+
 
 if __name__ == '__main__':
     rospy.init_node('App_node')
     
     global pubArm
-    pubArm = rospy.Publisher('motor1', Int32, queue_size=10)
+    pubArm = rospy.Publisher('motorArm', Int32, queue_size=10)
     
     global pubHand
-    pubHand = rospy.Publisher('motor2', Int32, queue_size=10)
+    pubHand = rospy.Publisher('motorHand', Int32, queue_size=10)
     
     global pubMonitor
     pubMonitor = rospy.Publisher('monitor_message', String, queue_size=10)
     
     rospy.Subscriber('graph_data', String, callback)
     rospy.Subscriber("motor_errors", String, error_callback)
+    rospy.Subscriber("positionArm", Int32, positionArm_callback)
+    rospy.Subscriber("positionHand", Int32, positionHand_callback)
     from threading import Thread
     flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
     flask_thread.start()
+    
+    global local_ip
     local_ip = get_local_ip()
     rospy.sleep(1) #necessary to have the monitor node up and running before the first callback
     
