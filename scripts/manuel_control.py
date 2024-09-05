@@ -140,7 +140,7 @@ def start_countdown(count_param):
     for i in range(count_param, 0, -1):
         update_oled_display(str(i))
         time.sleep(1)
-    update_oled_display("Running 3x3")
+    update_oled_display("starting...")
 
 def shutdown_countdown():
     update_oled_display("Shutting down...")

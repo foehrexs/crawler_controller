@@ -10,15 +10,7 @@ import rospy
 from std_msgs.msg import String, Int32
 from flask_sock import Sock
 import socket
-#relevant for the display
-from luma.core.interface.serial import i2c
-from luma.core.render import canvas
-from luma.oled.device import sh1106
-from PIL import ImageFont
-# OLED-Konstanten
-serial = i2c(port=1, address=0x3C)
-device = sh1106(serial)
-oled_font = ImageFont.truetype('FreeSans.ttf', 14)
+
 
 print("default application")
 
@@ -32,10 +24,6 @@ ws_connection2 = None
 # Global robot state
 robot_state = {"running": False, "data": "No data yet"}
 
-def update_oled_display(message):
-    with canvas(device) as draw:
-        draw.rectangle(device.bounding_box, outline="white", fill="black")
-        draw.text((5, 5), message, font=oled_font, fill="white")
 
 def get_local_ip():
     # Erstellt einen Dummy-Socket, um die IP-Adresse zu ermitteln
@@ -191,6 +179,8 @@ def index():
 
 @app.route('/automatik')
 def automatik():
+    pubMonitor.publish("automatik")
+    print("send")
     return render_template('automatik.html')
     
 @app.route('/manuel')
@@ -319,12 +309,18 @@ if __name__ == '__main__':
     global pubHand
     pubHand = rospy.Publisher('motor2', Int32, queue_size=10)
     
+    global pubMonitor
+    pubMonitor = rospy.Publisher('monitor_message', String, queue_size=10)
+    
     rospy.Subscriber('graph_data', String, callback)
     rospy.Subscriber("motor_errors", String, error_callback)
     from threading import Thread
     flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
     flask_thread.start()
     local_ip = get_local_ip()
-    update_oled_display(str(local_ip)+"\n:5000")
+    rospy.sleep(1) #necessary to have the monitor node up and running before the first callback
+    
+    pubMonitor.publish(str(local_ip)+"\n:5000")
+
     rospy.spin()
     #app.run(debug=True, host= '0.0.0.0')
