@@ -1,0 +1,85 @@
+h1 {
+    /*border: 2px #eee solid;*/
+    color: rgb(42, 91, 165);
+    text-align: center;
+    padding: 10px;
+    padding-bottom: 50px;
+}
+
+h3 {
+	text-align: center;
+}
+
+#startButton {
+    width: 100px;         
+    height: 100px;
+    display: inline-block;
+    padding: 25px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #04AA6D;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 9px #999;
+  }
+  
+  #startButton:hover {background-color: #3e8e41}
+  
+  #startButton:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+  }
+
+
+#stopButton {
+    width: 100px;         
+    height: 100px;
+    display: inline-block;
+    padding: 25px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #bc1206;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 9px #999;
+  }
+  
+  #stopButton:hover {background-color: #910e05}
+  
+  #stopButton:active {
+    background-color: #910e05;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+  }
+  
+.controlBlock {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px; 
+        }
+        
+.startButtons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        
+.buttonContainer {
+			grid-column: 2 / 3;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+.controlArm {
+            background-color: lightblue;
+        }
+

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename= 'css/manuel.css') }}">
+
+<h1>{% block title %} Manuelle Steuerung {% endblock %}</h1>
+
+<div class="startButtons">
+	<div class="buttonContainer">
+			<button class="btn btn-primary" id="startButton" onclick="this.blur()">Start</button> 
+			<button class="btn btn-danger" id="stopButton" onclick="this.blur();">Stop</button>
+			<p>Robot Data: <span id="robotData">No data yet</span></p>
+	</div>
+</div>
+
+<div class="controlBlock">
+	<div class="controlArm">
+		<h3>Innerer Motor</h3>
+		<div class= "buttonContainer">
+			<button class="btn btn-primary" id="upButtonArm" onclick="this.blur()">Hoch</button>
+			<button class="btn btn-danger" id="downButtonArm" onclick="this.blur();">Runter</button>
+		</div>
+	</div>
+	<div class="controlHand">
+		<h3>Äußerer Motor</h3>
+		<div class= "buttonContainer">
+			<button class="btn btn-primary" id="upButtonHand" onclick="this.blur()">Hoch</button>
+			<button class="btn btn-danger" id="downButtonHand" onclick="this.blur();">Runter</button>
+		</div>
+	</div>
+ </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+	  document.getElementById('startButton').addEventListener('click', function() {
+      fetch('/startManuel', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          fetchData();
+        });
+    });
+  
+    document.getElementById('stopButton').addEventListener('click', function() {
+      fetch('/stopManuel', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:',data);
+          fetchData();
+        });
+    });
+	  
+    document.getElementById('upButtonArm').addEventListener('click', function() {
+		var step = 100
+      fetch('/moveArm', { method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'step=' + encodeURIComponent(step)
+			 })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          fetchData();
+        });
+    });
+  
+    document.getElementById('downButtonArm').addEventListener('click', function() {
+      var step = -100
+      fetch('/moveArm', { method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'step=' + encodeURIComponent(step)
+			 })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          fetchData();
+        });
+    });
+    
+    document.getElementById('upButtonHand').addEventListener('click', function() {
+		var step = 100
+      fetch('/moveHand', { method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'step=' + encodeURIComponent(step)
+			 })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          fetchData();
+        });
+    });
+  
+    document.getElementById('downButtonHand').addEventListener('click', function() {
+      var step = -100
+      fetch('/moveHand', { method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'step=' + encodeURIComponent(step)
+			 })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          fetchData();
+        });
+    });
+  
+    function fetchData() {
+      fetch('/data')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('robotData').textContent = data.data;
+        });
+    }
+    
+  </script>
+
+{% endblock %}

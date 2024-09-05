@@ -8,6 +8,7 @@ matplotlib.use('Agg')  # Use a non-interactive backend
 import matplotlib.pyplot as plt
 
 
+
 # Global list to store the last 20 episodes of ride data
 episodes = []
 progresses = []

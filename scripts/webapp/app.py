@@ -7,7 +7,7 @@ import subprocess
 import os
 import signal
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32
 from flask_sock import Sock
 import socket
 #relevant for the display
@@ -68,14 +68,40 @@ def start_robot():
     print(params)
     pid_encoder = start_ros_node('crawler_controller', 'encoder_left.py', 'Sensoren_node', params)
     pid = start_ros_node('crawler_controller', 'q_learning_3x3.py', 'Q_Learning', params)
+    #pid = start_ros_node('crawler_controller', 'manuel_control.py', 'Manuel', params)
     pid_graph = start_ros_node('crawler_controller', 'data_work.py', 'Graph_node', params)
     print("after starting the node")
     robot_state["running"] = True
     robot_state["data"] = "Robot started"
+    
+def start_robot_manuel():
+    global robot_state
+    global pid
+    global pid_encoder
+    
+    params = [                     #parameters aren't necessary for the node but otherwise the start fucntion doesn't work
+        "_param1:={}".format(cnt),
+        "_param2:={}".format(lrate),
+        "_param3:={}".format(dfactor)
+    ]
+
+    pid_encoder = start_ros_node('crawler_controller', 'encoder_left.py', 'Sensoren_node', params)
+    pid = start_ros_node('crawler_controller', 'manuel_control.py', 'Manuel', params)
+    print("after starting the manuel node")
+    robot_state["running"] = True
+    robot_state["data"] = "Robot started"
+    
+def stop_robot_manuel():
+    global robot_state
+    stop_ros_node(pid, 'manuel_control.py')
+    stop_ros_node(pid_encoder, 'encoder_left.py')
+    robot_state["running"] = False
+    robot_state["data"] = "Robot stopped"
 
 def stop_robot():
     global robot_state
     stop_ros_node(pid, 'q_learning_3x3.py')
+    #stop_ros_node(pid, 'manuel_control.py')
     stop_ros_node(pid_encoder, 'encoder_left.py')
     stop_ros_node(pid_graph, 'data_work.py')
     robot_state["running"] = False
@@ -163,9 +189,28 @@ def index():
     update_oled_display(str(local_ip)+"\n:5000")
     return render_template('index.html')
 
-@app.route('/steuerung')
-def steuerung():
-    return render_template('steuerung.html')
+@app.route('/automatik')
+def automatik():
+    return render_template('automatik.html')
+    
+@app.route('/manuel')
+def manuel():
+    return render_template('manuel.html')
+    
+@app.route('/moveArm', methods=['POST'])
+def moveArm():
+    step = request.form.get('step')
+    print("step")
+    print(step)
+    pubArm.publish(int(step))
+
+@app.route('/moveHand', methods=['POST'])
+def moveHand():
+    step = request.form.get('step') 
+    print("hand")
+    print("step")
+    print(step)
+    pubHand.publish(int(step))
 
 @app.route('/graph')
 def graph():
@@ -199,6 +244,16 @@ def start():
 
     start_robot()
     return jsonify(status="started")
+
+@app.route('/startManuel', methods=['POST'])
+def startManuel():   
+    start_robot_manuel()
+    return jsonify(status="started")
+    
+@app.route('/stopManuel', methods=['POST'])
+def stopManuel():
+    stop_robot_manuel()
+    return jsonify(status="stopped")
 
 
 @app.route('/stop', methods=['POST'])
@@ -257,6 +312,13 @@ def ws2(ws2):
 
 if __name__ == '__main__':
     rospy.init_node('App_node')
+    
+    global pubArm
+    pubArm = rospy.Publisher('motor1', Int32, queue_size=10)
+    
+    global pubHand
+    pubHand = rospy.Publisher('motor2', Int32, queue_size=10)
+    
     rospy.Subscriber('graph_data', String, callback)
     rospy.Subscriber("motor_errors", String, error_callback)
     from threading import Thread
