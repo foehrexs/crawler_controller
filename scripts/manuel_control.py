@@ -186,7 +186,7 @@ def safe_shutdown():
     shutdown_procedure()  # Motoren ausschalten
     turn_off_oled_display() # OLED Display ausschalten
     # shutdown_raspberry()  # Raspberry Pi herunterfahren
-    shutdown_with_password(shutdown_password)
+    #shutdown_with_password(shutdown_password)
 
 def shutdown_procedure():
     # Hier wird das Drehmoment für alle Motoren beim Herunterfahren deaktiviert

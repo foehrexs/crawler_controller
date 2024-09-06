@@ -207,7 +207,7 @@ def positionHand_callback(data):
 def index():
     local_ip = get_local_ip()
     print(f"Die IP-Adresse dieses Computers ist: {local_ip}")
-    update_oled_display(str(local_ip)+"\n:5000")
+    pubMonitor.publish(str(local_ip)+"\n:5000")
     return render_template('index.html')
 
 @app.route('/automatik')
